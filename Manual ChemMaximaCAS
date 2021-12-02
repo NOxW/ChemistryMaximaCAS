@@ -19,8 +19,10 @@ balance(list)
 balance an non ionic form chemical reaction
 
 Examples:
+NaBO3 + FeS + NaOH + H2O --> Fe(OH)3 + NaBO2 + Na2SO4
 (%i1) balance(NaBO3,FeS,NaOH,H2O,FeO3H3,NaBO2,Na2SO4);
 (%o1)                        [9, 2, 4, 1, 2, 9, 2]
+SnS2 + HNO3 + H2O --> H2SnO3 + NO + H2SO4
 (%i2) balance(SnS2,HNO3,H2O,H2SnO3,NO,H2SO4);
 (%o2)                        [3, 16, 1, 3, 16, 6]
 
@@ -28,9 +30,10 @@ balance_ions(list,[charges])
 balance ionic form chemical reacion
 
 Examples:
+H^+ + Cr2O7^-2 + C2H5OH --> Cr^+3 + CO2 + H2O
 (%i3) balance_ions(H,Cr2O7,C2H5OH,Cr,CO2,H2O,[1,-2,0,3,0,0]);
 (%o3)                        [16, 2, 1, 4, 2, 11]
-
+MnO4^- + Cl^- + H^+ --> Mn^+2 + Cl2 + H2O
 (%i4) balance_ions(MnO4,Cl,H,Mn,Cl2,H2O,[-1,-1,1,2,0,0]);
 (%o4)                        [2, 10, 16, 2, 5, 8]
 
