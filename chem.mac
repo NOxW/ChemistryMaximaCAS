@@ -19,8 +19,6 @@
 Filename chem.mac
 Programmed by Ivan Penyak
 
-
-	DO UT DES
 	Nulla vita sine chemia
 
 */
@@ -148,7 +146,7 @@ balance([REACTION]) := block
 	return((abs(RESULT))*lmax(map(denom,RESULT)))
 	)$
 	
-balance_redox([REACTION]) := block
+balance_ionic([REACTION]) := block
 	(
 	[RESULT,CHARGES],
 	CHARGES:last(REACTION),
