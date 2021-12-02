@@ -8,6 +8,6 @@ FUNCTIONS:
 **balance();**
 balance a non ionic form chemical reaction
 
-**balance_redox()**
+**balance_ions()**
 balance reaction in ionic form
 
