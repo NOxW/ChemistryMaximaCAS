@@ -146,7 +146,7 @@ balance([REACTION]) := block
 	return((abs(RESULT))*lmax(map(denom,RESULT)))
 	)$
 	
-balance_ionic([REACTION]) := block
+balance_ions([REACTION]) := block
 	(
 	[RESULT,CHARGES],
 	CHARGES:last(REACTION),
