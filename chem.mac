@@ -1,0 +1,163 @@
+/*
+████████████████████████████████████████████████████████████████████████████████
+██░░███░░░░░░░░░░░░░████████████████████████████████████████░░░░░░░░░░░░░███░░██
+██░░████████████████████████████████████████████████████████████████████████░░██
+██░░█████░░░░█░░░░████████████████████████████████████████████░░░░█░░░░█████░░██
+██░░█████░██░█░██░████╔═══╦╗██████████╔═══╗██████╔╗███████████░██░█░██░█████░░██
+██░░███░█░░█░█░█░░█░██║╔═╗║║██████████║╔═╗║█████╔╝╚╗████████░█░░█░█░█░░█░███░░██
+██░░███░████░█░████░██║║█╚╣╚═╦══╦╗╔╗██║╚══╦╗█╔╦═╩╗╔╬══╦╗╔╗██░████░█░████░███░░██
+██░░███░░░░░░░░░░░░░██║║█╔╣╔╗║║═╣╚╝╠══╬══╗║║█║║══╣║║║═╣╚╝║██░░░░░░░░░░░░░███░░██
+██░░███░████░█░████░██║╚═╝║║║║║═╣║║╠══╣╚═╝║╚═╝╠══║╚╣║═╣║║║██░████░█░████░███░░██
+██░░███░█░░█░█░█░░█░██╚═══╩╝╚╩══╩╩╩╝██╚═══╩═╗╔╩══╩═╩══╩╩╩╝██░█░░█░█░█░░█░███░░██
+██░░█████░██░█░██░████████████████████████╔═╝║████████████████░██░█░██░█████░░██
+██░░█████░░░░█░░░░████████████████████████╚══╝████████████████░░░░█░░░░█████░░██
+██░░████████████████████████████████████████████████████████████████████████░░██
+██░░███░░░░░░░░░░░░░████████████████████████████████████████░░░░░░░░░░░░░███░░██
+████████████████████████████████████████████████████████████████████████████████
+
+
+Filename chem.mac
+Programmed by Ivan Penyak
+
+
+	DO UT DES
+	Nulla vita sine chemia
+
+*/
+
+
+
+
+SUBSTANCE_EVALUATION(SUBST_ANCE) := block
+	(
+	[L_DEF,TEMP_L,EVALUATED_SUBSTANCE],
+	L_DEF:[],TEMP_L:[],EVALUATED_SUBSTANCE:[],
+	for VAR_I thru length(SUBST_ANCE) do
+	( 
+		if (lowercasep(SUBST_ANCE[VAR_I])) 
+		then (TEMP_L:cons(VAR_I-1,TEMP_L),TEMP_L:cons(VAR_I,TEMP_L))
+	),
+	for VAR_O thru length(SUBST_ANCE) do
+	(
+		if (member(VAR_O,TEMP_L)=true and lowercasep(SUBST_ANCE[VAR_O])=true)
+		then (L_DEF:cons(concat(SUBST_ANCE[VAR_O-1],SUBST_ANCE[VAR_O]),L_DEF)) 
+		elseif (member(VAR_O,TEMP_L)=false)
+		then (L_DEF:cons(SUBST_ANCE[VAR_O],L_DEF))
+	),
+	L_DEF:reverse(L_DEF),
+	for ZZ_LOOP:length(L_DEF) step -1 thru 1 do
+	(
+		push(L_DEF[ZZ_LOOP],EVALUATED_SUBSTANCE),
+		(
+		if (ZZ_LOOP # 1) 
+		then 
+		(
+			if (is(slength(EVALUATED_SUBSTANCE[1])=2))
+			then (push("+",EVALUATED_SUBSTANCE))
+			else 
+			(
+				if (EVALUATED_SUBSTANCE[1] # ")" and L_DEF[ZZ_LOOP-1] # "(") 
+				then 
+				(
+					if (digitcharp(EVALUATED_SUBSTANCE[1])) 
+					then (push("*",EVALUATED_SUBSTANCE)) 
+					else 
+					(push("+",EVALUATED_SUBSTANCE))
+				)
+			)
+		)
+		)
+	),
+	return(eval_string(simplode(EVALUATED_SUBSTANCE)))
+	)$
+	
+rref(ARG):= block
+	(
+	[COORDINATE_X,COORDINATE_Y,MIN],
+	[COORDINATE_X,COORDINATE_Y]:matrix_size(ARG),
+	ARG:echelon(ARG),
+	MIN:min(COORDINATE_X,COORDINATE_Y),
+	for VAR_I thru min(COORDINATE_X,COORDINATE_Y) do 
+	(
+		if (ARG[VAR_I,VAR_I]=0) 
+		then 
+			(MIN:VAR_I-1,return())
+	),
+	for VAR_I:MIN thru 2 step -1 do 
+	(
+		for VAR_J from VAR_I-1 thru 1 step -1 do
+		(
+			ARG:rowop(ARG,VAR_J,VAR_I,ARG[VAR_J,VAR_I])
+		)
+	),
+	ARG)$ 
+
+REACTION_MATRIX_SOLVER(INIT_M) := block
+	(
+	[M_COORDINATE_A,M_COORDINATE_B,TRANS_M],
+	[M_COORDINATE_A,M_COORDINATE_B]:matrix_size(INIT_M),
+	TRANS_M:transpose(INIT_M),
+	return(lastn(rref(addcol(TRANS_M,ident(M_COORDINATE_B)))[M_COORDINATE_B],M_COORDINATE_B))
+	)$
+	
+REACTION_MATRIX_SOLVER_REDOX(INIT_M,CHARGE) := block
+	(
+	[M_COORDINATE_A,M_COORDINATE_B,TRANS_M],
+	[M_COORDINATE_A,M_COORDINATE_B]:matrix_size(INIT_M),
+	INIT_M:addrow(INIT_M,CHARGE),
+	TRANS_M:transpose(INIT_M),
+	TRANS_M:addcol(TRANS_M,ident(M_COORDINATE_B)),
+	TRANS_M:rref(TRANS_M),
+	return(lastn(TRANS_M[M_COORDINATE_B],M_COORDINATE_B))
+	)$
+	
+EQUATION_TO_MATRIX_GENERATOR(EXPRESSION) := block  
+	(
+	[COL_GEN,REACTION_MATRIX],
+	COL_GEN:([]),
+	REACTION_MATRIX:matrix(),
+	for j thru length(EXPRESSION) do (
+		for i thru length(listofvars(EXPRESSION)) do 
+		(
+			COL_GEN:append(COL_GEN,[diff(args(EXPRESSION)[j],listofvars(args(EXPRESSION))[i])]),
+			if (length(COL_GEN) = length(listofvars(EXPRESSION))) 
+			then 
+			(
+			REACTION_MATRIX:addcol(REACTION_MATRIX,COL_GEN),COL_GEN:[]
+			)
+		)
+	),
+	return(REACTION_MATRIX)
+	)$
+
+REACTION_LIST_TO_EQUATION(REACTION_LIST) := block
+	(
+	for SUBSTANCE_ID thru length(REACTION_LIST) do 
+	(
+		REACTION_LIST[SUBSTANCE_ID]:charlist(string(REACTION_LIST[SUBSTANCE_ID])),
+		REACTION_LIST[SUBSTANCE_ID]:SUBSTANCE_EVALUATION(REACTION_LIST[SUBSTANCE_ID])
+	),
+	return(REACTION_LIST)
+	)$
+
+balance([REACTION]) := block
+	(
+	[RESULT],
+	RESULT:EQUATION_TO_MATRIX_GENERATOR(REACTION_LIST_TO_EQUATION(REACTION)),
+	RESULT:REACTION_MATRIX_SOLVER(RESULT),
+	return((abs(RESULT))*lmax(map(denom,RESULT)))
+	)$
+	
+balance_redox([REACTION]) := block
+	(
+	[RESULT,CHARGES],
+	CHARGES:last(REACTION),
+	REACTION:firstn(REACTION,length(REACTION)-1),
+	RESULT:EQUATION_TO_MATRIX_GENERATOR(REACTION_LIST_TO_EQUATION(REACTION)),
+	RESULT:REACTION_MATRIX_SOLVER_REDOX(RESULT,CHARGES),
+	return(abs(RESULT)*lmax(map(denom,RESULT)))
+	)$
+	
+	
+	
+	
